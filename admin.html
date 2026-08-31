@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Beauty Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        body{font-family:sans-serif;background:#f4f4f4;padding:20px;}
+        .container{max-width:800px;margin:auto;background:white;padding:20px;border-radius:10px;}
+        h1{text-align:center;}
+        .user-card{border:1px solid #ddd;padding:15px;margin:10px 0;border-radius:8px;}
+        img{max-width:100px;border-radius:5px;margin:5px;}
+        .score-input{width:100px;padding:8px;border:2px solid #5b3a8a;border-radius:5px;}
+        .btn{background:green;color:white;border:none;padding:10px;border-radius:5px;cursor:pointer;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Panel</h1>
+        <p>Password লিখুন:</p>
+        <input type="password" id="pass" placeholder="Admin Password">
+        <button onclick="unlock()">Login</button>
+
+        <div id="panel" style="display:none; margin-top:20px;">
+            <h3>Pending Reviews</h3>
+            <div id="users"></div>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = { /* আপনার কনফিগ */ apiKey: "AIzaSyCTLddjFi-b5c2tKED4oVaDjlN6JdT_kNY", authDomain: "beauty-tracker-8b3c3.firebaseapp.com", projectId: "beauty-tracker-8b3c3", storageBucket: "beauty-tracker-8b3c3.firebasestorage.app", messagingSenderId: "946147639561", appId: "1:946147639561:web:7d401da563859e953c13d8" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function unlock(){
+        const pass = document.getElementById('pass').value;
+        // ⚠️ আপনার পাসওয়ার্ড এখানে বদলান (যেমন: "1234")
+        if(pass === "admin123"){
+            document.getElementById('panel').style.display = 'block';
+            loadUsers();
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+
+    async function loadUsers(){
+        const usersDiv = document.getElementById('users');
+        usersDiv.innerHTML = "";
+        const q = await db.collection('users').where('status', '==', 'pending').get();
+        q.forEach((doc) => {
+            const data = doc.data();
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.innerHTML = `
+                <h4>${data.name || "Unknown"}</h4>
+                <p>Email: ${data.email || "No email"}</p>
+                <img src="${data.answers.photoUrls[0] || ''}" />
+                <img src="${data.answers.photoUrls[1] || ''}" />
+                <p>Voice: <a href="${data.answers.voiceUrl || '#'}" target="_blank">Listen Audio</a></p>
+                <p>Lifestyle: ${data.answers.q1 || ""}</p>
+                <p>Partner: ${data.answers.q2 || ""}</p>
+                <p>Marriage: ${data.answers.q3 || ""}</p>
+                <input type="number" class="score-input" id="score-${doc.id}" min="0" max="100" placeholder="Score">
+                <button class="btn" onclick="submitScore('${doc.id}')">Submit Score</button>
+            `;
+            usersDiv.appendChild(card);
+        });
+    }
+
+    async function submitScore(userId){
+        const score = document.getElementById(`score-${userId}`).value;
+        if(score === "") return alert("Score দিন!");
+        await db.collection('users').doc(userId).update({ score: parseInt(score), status: "reviewed" });
+        alert("Score দেওয়া হয়েছে! ইউজার এখন দেখতে পাবে।");
+        loadUsers(); // রিফ্রেশ
+    }
+</script>
+</body>
+</html>
