@@ -1,140 +1,197 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✨ Beauty Tracker by Fashison AI</title>
-    <!-- Google Fonts (প্রিমিয়াম লুকের জন্য) -->
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px; 
-            background-image: url('background.jpg'); /* ছবির নাম background.jpg */
-            background-size: cover; 
-            background-position: center; 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
             background-attachment: fixed;
         }
         
-        /* অ্যাডভান্সড গ্লাস ইফেক্ট */
-        .glass { 
-            background: rgba(255, 255, 255, 0.75); 
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
-            border-radius: 24px; 
-            padding: 40px; 
-            max-width: 500px; 
-            width: 100%; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255,255,255,0.4); 
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255,255,255,0.4);
             border: 1px solid rgba(255,255,255,0.2);
         }
-
-        .logo { 
-            text-align: center; 
-            font-size: 2.5rem; 
-            font-weight: 800; 
-            font-family: 'Playfair Display', serif; 
-            background: linear-gradient(45deg, #d65a31, #f6c90e); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 20px; 
+        
+        h1, h2, h3, .logo {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #d65a31, #5b3a8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
             letter-spacing: 1px;
         }
-
-        .btn { 
-            width: 100%; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 50px; 
-            font-size: 16px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            margin-top: 15px; 
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
             transition: all 0.3s ease;
             letter-spacing: 0.5px;
+            font-family: 'Poppins', sans-serif;
         }
-
-        .btn-google { 
-            background: white; 
-            border: 2px solid #ddd; 
-            color: #333; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
+        
+        .btn-google {
+            background: white;
+            border: 2px solid #ddd;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .btn-google:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-
-        .btn-purple { 
-            background: linear-gradient(135deg, #764ba2, #d65a31); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        .btn-google:hover { transform: translateY(-2px); }
+        
+        .btn-purple {
+            background: linear-gradient(135deg, #5b3a8a, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(91, 58, 138, 0.4);
         }
-        .btn-purple:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(118, 75, 162, 0.5); }
-
+        .btn-purple:hover { transform: translateY(-2px); }
+        
+        .btn-gallery {
+            background-color: #5b3a8a;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .btn-camera {
+            background-color: #b84a26;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .btn-gallery:hover, .btn-camera:hover { transform: translateY(-2px); }
+        
         .hidden { display: none !important; }
         
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            border: 2px solid rgba(0,0,0,0.1); 
-            border-radius: 10px; 
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
             font-size: 15px;
             background: rgba(255,255,255,0.9);
             font-family: 'Poppins', sans-serif;
         }
-        input:focus, textarea:focus { border-color: #764ba2; outline: none; }
-
-        .card { background: rgba(255,255,255,0.6); padding: 15px; border-radius: 15px; margin: 10px 0; backdrop-filter: blur(5px); }
+        input:focus, textarea:focus { border-color: #5b3a8a; outline: none; }
         
-        .upload-box { 
-            border: 2px dashed #764ba2; 
-            padding: 30px; 
-            text-align: center; 
-            cursor: pointer; 
-            border-radius: 15px; 
-            background: rgba(250,250,250,0.8); 
+        .card {
+            background: rgba(255,255,255,0.6);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .upload-box {
+            border: 2px dashed #5b3a8a;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 15px;
+            background: rgba(250,250,250,0.8);
+            margin-top: 15px;
         }
         .upload-box:hover { background: rgba(243,232,255,0.8); }
-
-        img#photoPreview { max-width: 100%; margin-top: 10px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        .score-box { 
-            background: linear-gradient(135deg, #f093fb, #d65a31); 
-            color: white; 
-            padding: 15px; 
-            border-radius: 15px; 
-            text-align: center; 
-            font-size: 20px; 
-            font-weight: bold; 
-            margin: 10px 0; 
-            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        .photo-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
         }
         
-        .feedback { 
+        .photo-item {
+            position: relative;
+        }
+        
+        .photo-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid #5b3a8a;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .score-box {
+            background: linear-gradient(135deg, #5b3a8a, #b84a26);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(91, 58, 138, 0.4);
+        }
+        
+        .feedback {
             background: linear-gradient(135deg, #fdfbfb, #ebedee);
-            border-left: 5px solid #4caf50; 
-            padding: 20px; 
-            margin-top: 20px; 
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin-top: 20px;
             border-radius: 10px;
             line-height: 1.6;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-
-        h2, h3 { font-family: 'Playfair Display', serif; color: #333; margin-bottom: 15px; }
+        
         p { color: #555; margin-bottom: 10px; font-size: 14px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group .btn { flex: 1; margin-top: 0; }
     </style>
 </head>
 <body>
@@ -145,79 +202,80 @@
         <div id="step-login">
             <button class="btn btn-google" onclick="googleLogin()">
                 <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Google দিয়ে লগইন করুন
+                Continue with Google
             </button>
         </div>
 
         <!-- PROFILE -->
         <div id="step-profile" class="hidden">
-            <h3>👤 আপনার তথ্য দিন</h3>
-            <input type="text" id="userName" placeholder="আপনার নাম">
+            <h3>Your Information</h3>
+            <input type="text" id="userName" placeholder="Your Name">
             <input type="date" id="dob">
-            <button class="btn btn-purple" onclick="saveProfile()">পরবর্তী →</button>
+            <button class="btn btn-purple" onclick="saveProfile()">Next →</button>
         </div>
 
-        <!-- PHOTO -->
-<div id="step-photo" class="hidden">
-    <h3>📸 ছবি আপলোড করুন</h3>
-    
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button onclick="document.getElementById('galleryInput').click()" class="btn" style="background:#764ba2; color:white; flex:1;">
-            📁 গ্যালারি থেকে
-        </button>
-        <button onclick="document.getElementById('cameraInput').click()" class="btn" style="background:#d65a31; color:white; flex:1;">
-            📷 ক্যামেরা
-        </button>
-    </div>
+        <!-- PHOTO (3+ Photos) -->
+        <div id="step-photo" class="hidden">
+            <h3 style="text-align:center;">Give your best picture</h3>
+            <p style="text-align:center; color:#666;">(At least 3 - You can add more)</p>
+            
+            <div class="btn-group">
+                <button onclick="document.getElementById('galleryInput').click()" class="btn btn-gallery">📁 Gallery</button>
+                <button onclick="document.getElementById('cameraInput').click()" class="btn btn-camera">📷 Camera</button>
+            </div>
 
-    <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="uploadPhoto(event)">
+            <input type="file" id="galleryInput" accept="image/*" multiple class="hidden" onchange="handlePhotos(event)">
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotos(event)">
 
-    <div class="upload-box" onclick="document.getElementById('galleryInput').click()">
-        <p>অথবা এখানে ক্লিক করে ছবি দিন</p>
-        <img id="photoPreview" class="hidden">
-    </div>
+            <div class="upload-box">
+                <p style="color:#5b3a8a;">Click here to select multiple photos</p>
+                <div id="photoGrid" class="photo-grid"></div>
+            </div>
 
-    <div id="photoLoading" class="hidden" style="text-align:center; margin:10px; color:#764ba2;">🤖 AI বিশ্লেষণ চলছে...</div>
-    <div id="photoResult" class="hidden">
-        <div class="score-box">✨ সৌন্দর্য স্কোর: <span id="photoScore"></span>/100</div>
-        <button class="btn btn-purple" onclick="goVoice()">পরবর্তী →</button>
-    </div>
-</div>
+            <div id="photoLoading" class="hidden" style="text-align:center; margin:15px; color:#5b3a8a; font-weight:bold;">🤖 AI is analyzing your beauty...</div>
+            
+            <div id="photoResult" class="hidden">
+                <div class="score-box">✨ Beauty Score: <span id="photoScore"></span>/100</div>
+                <button class="btn btn-purple" onclick="goVoice()">Next →</button>
+            </div>
+            
+            <div id="photoError" class="hidden" style="color:red; text-align:center; margin-top:10px;">Please select at least 3 photos!</div>
+        </div>
 
         <!-- VOICE -->
         <div id="step-voice" class="hidden">
-            <h3>🎙️ ভয়েস রেকর্ড করুন</h3>
+            <h3>Voice Recording</h3>
+            <p>Speak about yourself (1 line song/intro) - Max 2 minutes</p>
             <div class="card">
-                <button class="btn btn-purple" onclick="startRec()">🔴 রেকর্ড শুরু</button>
-                <button class="btn" onclick="stopRec()" id="stopBtn" style="display:none; background:#333; color:white;">⏹️ বন্ধ করুন</button>
+                <button class="btn btn-purple" onclick="startRec()">🔴 Start Recording</button>
+                <button class="btn" onclick="stopRec()" id="stopBtn" style="display:none; background:#333; color:white;">⏹️ Stop</button>
                 <audio id="audioPlayer" controls class="hidden" style="margin-top:10px; width:100%;"></audio>
             </div>
             <div id="voiceResult" class="hidden">
-                <div class="score-box">🎙️ ভয়েস স্কোর: <span id="voiceScore"></span>/100</div>
-                <button class="btn btn-purple" onclick="goQuestions()">পরবর্তী →</button>
+                <div class="score-box">🎙️ Voice Score: <span id="voiceScore"></span>/100</div>
+                <button class="btn btn-purple" onclick="goQuestions()">Next →</button>
             </div>
         </div>
 
         <!-- QUESTIONS -->
         <div id="step-questions" class="hidden">
-            <h3>📝 ব্যক্তিত্ব প্রশ্ন</h3>
-            <textarea id="q1" placeholder="১. আপনার জীবনধারা কেমন? (শান্ত/সক্রিয়)"></textarea>
-            <textarea id="q2" placeholder="২. আদর্শ সাথীর ৩টি গুণ বলুন"></textarea>
-            <textarea id="q3" placeholder="৩. বিবাহিত জীবনে প্রত্যাশা কী?"></textarea>
-            <textarea id="q4" placeholder="৪. ক্যারিয়ার লক্ষ্য কী?"></textarea>
-            <textarea id="q5" placeholder="৫. প্রিয় শখ কী?"></textarea>
-            <button class="btn btn-purple" onclick="submitAll()">🏆 ফলাফল দেখুন</button>
+            <h3>Personality Questions</h3>
+            <textarea id="q1" placeholder="1. What is your lifestyle like? (Calm/Active/Social)"></textarea>
+            <textarea id="q2" placeholder="2. Name 3 qualities of your ideal partner."></textarea>
+            <textarea id="q3" placeholder="3. What are your expectations in married life?"></textarea>
+            <textarea id="q4" placeholder="4. What is your career goal?"></textarea>
+            <textarea id="q5" placeholder="5. What is your favorite hobby?"></textarea>
+            <button class="btn btn-purple" onclick="submitAll()">🏆 See Results</button>
         </div>
 
         <!-- RESULT -->
         <div id="step-result" class="hidden">
-            <h3>🏆 আপনার AI রিপোর্ট</h3>
+            <h3>Your AI Report</h3>
             <div class="card" style="text-align:center;">
-                <p>সৌন্দর্য: <b id="finalBeauty"></b> | ভয়েস: <b id="finalVoice"></b> | ব্যক্তিত্ব: <b id="finalPers"></b></p>
+                <p>Beauty: <b id="finalBeauty"></b> | Voice: <b id="finalVoice"></b> | Personality: <b id="finalPers"></b></p>
             </div>
             <div class="feedback" id="feedback"></div>
-            <button class="btn btn-purple" onclick="location.reload()">🔄 আবার শুরু করুন</button>
+            <button class="btn btn-purple" onclick="location.reload()">🔄 Start Again</button>
         </div>
     </div>
 
@@ -247,6 +305,10 @@
         let audioChunks = [];
         let audioBlob = null;
 
+        // Multiple Photos
+        let selectedFiles = [];
+        let uploadedUrls = [];
+
         // LOGIN
         async function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -254,7 +316,7 @@
                 const result = await auth.signInWithPopup(provider);
                 currentUser = result.user;
                 show('step-profile');
-            } catch(e) { alert("লগইন সমস্যা: " + e.message); }
+            } catch(e) { alert("Login issue: " + e.message); }
         }
 
         function show(id) {
@@ -266,7 +328,7 @@
         async function saveProfile() {
             const name = document.getElementById('userName').value;
             const dob = document.getElementById('dob').value;
-            if(!name || !dob) return alert("সব তথ্য দিন!");
+            if(!name || !dob) return alert("Please fill all fields!");
             
             await db.collection('users').doc(currentUser.uid).set({
                 name, dob, email: currentUser.email
@@ -274,7 +336,7 @@
             show('step-photo');
         }
 
-        // Cloudinary আপলোড ফাংশন
+        // Cloudinary Upload
         async function uploadToCloudinary(file) {
             const formData = new FormData();
             formData.append("file", file);
@@ -288,37 +350,75 @@
             return data.secure_url;
         }
 
-        // PHOTO UPLOAD
-        async function uploadPhoto(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-
-            const img = document.getElementById('photoPreview');
-            img.src = URL.createObjectURL(file);
-            img.classList.remove('hidden');
-
-            document.getElementById('photoLoading').classList.remove('hidden');
-
-            try {
-                const downloadUrl = await uploadToCloudinary(file);
-                
-                setTimeout(async () => {
-                    photoScore = Math.floor(Math.random() * 46) + 55;
-                    document.getElementById('photoScore').textContent = photoScore;
-                    document.getElementById('photoLoading').classList.add('hidden');
-                    document.getElementById('photoResult').classList.remove('hidden');
-
-                    await db.collection('users').doc(currentUser.uid).update({
-                        photoUrl: downloadUrl,
-                        photoScore: photoScore
-                    });
-                }, 1500);
-            } catch(e) {
-                alert("ছবি আপলোড করতে সমস্যা হয়েছে!");
-            }
+        // PHOTO HANDLING
+        function handlePhotos(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            
+            selectedFiles = selectedFiles.concat(files);
+            renderPreviews();
+            document.getElementById('photoError').classList.add('hidden');
         }
 
-        function goVoice() { show('step-voice'); }
+        function renderPreviews() {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                grid.innerHTML += `
+                    <div class="photo-item">
+                        <img src="${url}">
+                        <button onclick="removePhoto(${index})" class="remove-btn">×</button>
+                    </div>`;
+            });
+        }
+
+        function removePhoto(index) {
+            selectedFiles.splice(index, 1);
+            renderPreviews();
+        }
+
+        async function analyzePhotos() {
+            if (selectedFiles.length < 3) {
+                document.getElementById('photoError').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('photoLoading').classList.remove('hidden');
+            document.getElementById('photoResult').classList.add('hidden');
+            
+            uploadedUrls = [];
+            let scores = [];
+            
+            for (const file of selectedFiles) {
+                try {
+                    const url = await uploadToCloudinary(file);
+                    uploadedUrls.push(url);
+                    scores.push(Math.floor(Math.random() * 41) + 55);
+                } catch(e) {
+                    alert("Photo upload failed!");
+                    return;
+                }
+            }
+            
+            photoScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            
+            document.getElementById('photoScore').textContent = photoScore;
+            document.getElementById('photoLoading').classList.add('hidden');
+            document.getElementById('photoResult').classList.remove('hidden');
+            
+            await db.collection('users').doc(currentUser.uid).update({
+                photoUrls: uploadedUrls,
+                photoScore: photoScore
+            });
+        }
+
+        function goVoice() {
+            analyzePhotos();
+            if (selectedFiles.length >= 3) {
+                show('step-voice');
+            }
+        }
 
         // VOICE RECORDING
         async function startRec() {
@@ -345,7 +445,7 @@
                         voiceScore: voiceScore
                     });
                 } catch(e) {
-                    alert("ভয়েস আপলোড করতে সমস্যা হয়েছে!");
+                    alert("Voice upload failed!");
                 }
             };
             mediaRecorder.start();
@@ -384,7 +484,7 @@
             
             const total = Math.round((photoScore + voiceScore + persScore) / 3);
             document.getElementById('feedback').innerHTML = 
-                `আপনার মোট স্কোর ${total}/100। আপনার তথ্য সফলভাবে আমাদের সার্ভারে (Firebase) সেভ হয়েছে। AI বিশ্লেষণে আপনি আত্মবিশ্বাসী ও আকর্ষণীয়!`;
+                `Your total score is ${total}/100. Your information has been saved successfully. AI analysis shows you are confident and attractive!`;
 
             show('step-result');
         }
