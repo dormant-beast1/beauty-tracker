@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Beauty Tracker</title>
+    <title>✨ Beauty Tracker by Fashison AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -12,77 +12,110 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Poppins',sans-serif; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; background-image:url('background.jpg'); background-size:cover; background-position:center; }
-        .glass { background:rgba(255,255,255,.9); border-radius:24px; padding:40px; max-width:500px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,.2); }
+        .glass { background:rgba(255,255,255,.92); border-radius:24px; padding:40px; max-width:500px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,.2); }
         .logo { text-align:center; font-size:2.5rem; font-weight:800; background:linear-gradient(45deg,#d65a31,#5b3a8a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; font-family:'Playfair Display',serif; }
         .btn { width:100%; padding:14px; border:none; border-radius:50px; font-size:16px; font-weight:600; cursor:pointer; margin-top:15px; transition:0.3s; }
         .btn-purple { background:#5b3a8a; color:white; }
         .btn-orange { background:#b84a26; color:white; }
+        .btn-group { display:flex; gap:10px; }
+        .btn-group .btn { flex:1; margin-top:10px; }
         .hidden { display:none !important; }
         input, textarea { width:100%; padding:12px; margin:8px 0; border:2px solid #ddd; border-radius:10px; }
         .trust-box { text-align:center; padding:20px; border:2px solid #5b3a8a; border-radius:15px; margin-bottom:20px; }
         .trust-box h3 { color:#5b3a8a; margin-bottom:10px; font-size:24px; }
         .type-text { min-height: 80px; font-size: 15px; color: #555; line-height: 1.6; }
         .score-box { background:linear-gradient(135deg,#5b3a8a,#b84a26); color:white; padding:15px; border-radius:15px; text-align:center; font-size:20px; font-weight:bold; margin:10px 0; }
+        
+        /* নতুন পপ-আপ (Modal) ডিজাইন */
+        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:1000; }
+        .modal-content { background:white; padding:40px; border-radius:20px; text-align:center; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+        .modal-content h2 { color:#5b3a8a; margin-bottom:10px; }
+        .modal-content .score-display { font-size:4rem; font-weight:800; background:linear-gradient(45deg,#d65a31,#5b3a8a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:20px 0; }
+        .modal-close { background:#5b3a8a; color:white; border:none; padding:10px 30px; border-radius:50px; cursor:pointer; font-weight:600; }
+
+        /* ছবির গ্রিড */
+        .photo-grid { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+        .photo-grid img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #5b3a8a; }
     </style>
 </head>
 <body>
     <div class="glass">
         <div class="logo">✨ Beauty Tracker</div>
 
-        <!-- ১. নিরাপত্তা পেজ (Trust) -->
+        <!-- ১. Trust Section -->
         <div id="step-trust">
             <div class="trust-box">
-                <h3> You are totally safe</h3>
+                <h3>🔒 You are totally safe</h3>
                 <p id="type-text" class="type-text"></p>
                 <p style="font-size:12px; color:#888; margin-top:10px;">You will see your result here once the admin reviews.</p>
             </div>
-            <button class="btn btn-purple" onclick="show('step-login')">Start →</button>
+            <button class="btn btn-purple" onclick="show('step-login')">Start Assessment →</button>
         </div>
 
-        <!-- ২. লগইন -->
+        <!-- ২. Login -->
         <div id="step-login" class="hidden">
             <button class="btn btn-orange" onclick="googleLogin()">Continue with Google</button>
         </div>
 
-        <!-- ৩. প্রোফাইল -->
+        <!-- ৩. Profile -->
         <div id="step-profile" class="hidden">
-            <h3>Your Info</h3>
+            <h3>Your Information</h3>
             <input type="text" id="userName" placeholder="Your Name">
             <input type="date" id="dob">
             <button class="btn btn-purple" onclick="saveProfile()">Next →</button>
         </div>
 
-        <!-- ৪. ছবি, ভয়েস ও প্রশ্ন -->
+        <!-- ৪. Photo Upload (Camera + Gallery) -->
         <div id="step-photo" class="hidden">
             <h3>Upload Photos (Min 3)</h3>
+            <div class="btn-group">
+                <button class="btn btn-purple" onclick="document.getElementById('photoInput').click()">📁 Gallery</button>
+                <button class="btn btn-orange" onclick="document.getElementById('cameraInput').click()">📷 Camera</button>
+            </div>
+
             <input type="file" id="photoInput" accept="image/*" multiple class="hidden" onchange="handlePhoto(event)">
-            <button class="btn btn-purple" onclick="document.getElementById('photoInput').click()">📁 Select Photos</button>
-            <div id="photoGrid" style="display:flex; gap:5px; flex-wrap:wrap; margin-top:10px;"></div>
-            <button class="btn btn-orange" onclick="goVoice()">Next →</button>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event)">
+
+            <div id="photoGrid" class="photo-grid"></div>
+            <button class="btn btn-purple" onclick="goVoice()">Next →</button>
         </div>
 
+        <!-- ৫. Voice Recording -->
         <div id="step-voice" class="hidden">
-            <h3>Voice Record</h3>
+            <h3>Voice Recording</h3>
             <button class="btn btn-purple" onclick="startRec()">🔴 Record</button>
             <button class="btn btn-orange" onclick="stopRec()" id="stopBtn" style="display:none;">⏹️ Stop</button>
             <audio id="audioPlayer" controls class="hidden" style="width:100%; margin-top:10px;"></audio>
             <button class="btn btn-purple" onclick="goQuestions()">Next →</button>
         </div>
 
+        <!-- ৬. Personality Questions (6 Questions added) -->
         <div id="step-questions" class="hidden">
             <h3>Personality Questions</h3>
-            <textarea id="q1" placeholder="Lifestyle?"></textarea>
-            <textarea id="q2" placeholder="Ideal partner traits?"></textarea>
-            <textarea id="q3" placeholder="Marriage expectations?"></textarea>
+            <textarea id="q1" placeholder="1. What is your lifestyle like?"></textarea>
+            <textarea id="q2" placeholder="2. Ideal partner traits?"></textarea>
+            <textarea id="q3" placeholder="3. Marriage expectations?"></textarea>
+            <textarea id="q4" placeholder="4. What is your favorite food?"></textarea>
+            <textarea id="q5" placeholder="5. What is your favorite place?"></textarea>
+            <textarea id="q6" placeholder="6. Name of your loved one?"></textarea>
             <button class="btn btn-orange" onclick="submitAll()">📤 Submit Data</button>
         </div>
 
-        <!-- ৫. সাবমিটের পর মেসেজ -->
+        <!-- ৭. Submitted Message (English) -->
         <div id="step-submitted" class="hidden">
-            <h3 style="text-align:center; color:#5b3a8a;">✅ তথ্য জমা হয়েছে!</h3>
-            <p style="text-align:center;">অ্যাডমিন আপনার তথ্য যাচাই করে স্কোর দিলে, এখানে চাপ দিলে স্কোর দেখতে পাবেন।</p>
+            <h3 style="text-align:center; color:#5b3a8a;">✅ Data Submitted!</h3>
+            <p style="text-align:center;">Your info has been sent to the admin. Please check back later.</p>
             <button class="btn btn-purple" onclick="checkResult()">Check My Result</button>
-            <div id="displayScore" class="score-box hidden"></div>
+        </div>
+    </div>
+
+    <!-- ৮. Result Modal (Pop-up) -->
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Your AI Score</h2>
+            <div class="score-display" id="modalScore">--</div>
+            <p style="color:#666; margin-bottom:20px;">Thank you for trusting us!</p>
+            <button class="modal-close" onclick="closeModal()">Close</button>
         </div>
     </div>
 
@@ -93,56 +126,55 @@
         const CLOUD_NAME = "hbgz4asd"; const UPLOAD_PRESET = "beauty_tracker";
         let currentUser = null; let mediaRecorder = null; let audioChunks = []; let selectedPhotoUrls = [];
 
-        // টাইপিং ইফেক্ট ফাংশন
-        const trustText = "Your photos, voice, and information are 100% secure. They are only visible to your parsonal ai . We never share your data with any third party. So do not worry ,go ahead,hoping this journey will be a great part in your life.";
-
+        // Typing Effect
+        const trustText = "Your photos, voice, and information are 100% secure. They are only visible to our admin. We never share your data with any third party.";
         function typeWriter() {
-            let i = 0;
-            const target = document.getElementById('type-text');
-            target.innerHTML = '';
+            let i = 0; const target = document.getElementById('type-text'); target.innerHTML = '';
             function typing() {
-                if (i < trustText.length) {
-                    target.innerHTML += trustText.charAt(i);
-                    i++;
-                    setTimeout(typing, 20); // 20ms দ্রুত টাইপ হবে
-                }
+                if (i < trustText.length) { target.innerHTML += trustText.charAt(i); i++; setTimeout(typing, 20); }
             }
             typing();
         }
-
-        // পেজ লোড হলে টাইপিং শুরু
-        window.onload = function() {
-            typeWriter();
-        };
+        window.onload = typeWriter;
 
         function show(id){ document.querySelectorAll('div[id^="step-"]').forEach(el=>el.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+
+        // Auth & Profile
         async function googleLogin(){ const p=new firebase.auth.GoogleAuthProvider(); try{ const r=await auth.signInWithPopup(p); currentUser=r.user; show('step-profile'); }catch(e){ alert(e.message); } }
         async function saveProfile(){ const name=document.getElementById('userName').value; const dob=document.getElementById('dob').value; if(!name||!dob) return alert("Fill all"); await db.collection('users').doc(currentUser.uid).set({name,dob,email:currentUser.email,status:"pending"},{merge:true}); show('step-photo'); }
 
-        async function handlePhoto(e){ const files=Array.from(e.target.files); const grid=document.getElementById('photoGrid'); for(const file of files){ const url=await uploadToCloudinary(file); selectedPhotoUrls.push(url); const img=document.createElement('img'); img.src=url; img.style.width='50px'; img.style.height='50px'; img.style.borderRadius='5px'; grid.appendChild(img); } }
+        // Photo Upload (Gallery + Camera)
+        async function handlePhoto(e){ const files=Array.from(e.target.files); const grid=document.getElementById('photoGrid'); for(const file of files){ const url=await uploadToCloudinary(file); selectedPhotoUrls.push(url); const img=document.createElement('img'); img.src=url; grid.appendChild(img); } e.target.value = ''; }
         async function uploadToCloudinary(file){ const fd=new FormData(); fd.append('file',file); fd.append('upload_preset',UPLOAD_PRESET); const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,{method:'POST',body:fd}); const d=await r.json(); return d.secure_url; }
         function goVoice(){ show('step-voice'); }
 
+        // Voice Recording
         async function startRec(){ const stream=await navigator.mediaDevices.getUserMedia({audio:true}); mediaRecorder=new MediaRecorder(stream); audioChunks=[]; mediaRecorder.ondataavailable=e=>audioChunks.push(e.data); mediaRecorder.onstop=async()=>{ const blob=new Blob(audioChunks,{type:'audio/webm'}); const url=await uploadToCloudinary(blob); localStorage.setItem('voiceUrl',url); const audio=document.getElementById('audioPlayer'); audio.src=URL.createObjectURL(blob); audio.classList.remove('hidden'); document.getElementById('stopBtn').style.display='none'; }; mediaRecorder.start(); document.querySelector('#step-voice .btn-purple').style.display='none'; document.getElementById('stopBtn').style.display='block'; }
         function stopRec(){ mediaRecorder.stop(); document.querySelector('#step-voice .btn-purple').style.display='block'; }
         function goQuestions(){ show('step-questions'); }
 
+        // Submit Questions (6 Questions)
         async function submitAll(){ 
-            const answers={ q1:q1.value, q2:q2.value, q3:q3.value, voiceUrl: localStorage.getItem('voiceUrl'), photoUrls: selectedPhotoUrls };
+            const answers={ q1:q1.value, q2:q2.value, q3:q3.value, q4:q4.value, q5:q5.value, q6:q6.value, voiceUrl: localStorage.getItem('voiceUrl'), photoUrls: selectedPhotoUrls };
             await db.collection('users').doc(currentUser.uid).set({ answers, status: "pending", score: null }, {merge:true});
             show('step-submitted');
         }
 
+        // Check Result & Modal
         async function checkResult(){
             const doc = await db.collection('users').doc(currentUser.uid).get();
             if(doc.exists && doc.data().score !== null && doc.data().score !== undefined){
                 const score = doc.data().score;
-                const box = document.getElementById('displayScore');
-                box.textContent = `আপনার স্কোর: ${score}/100`;
-                box.classList.remove('hidden');
+                document.getElementById('modalScore').textContent = score + "/100";
+                document.getElementById('resultModal').classList.add('show-modal');
             } else {
-                alert("অ্যাডমিন এখনো স্কোর দেননি। কিছুক্ষণ পর আবার চেষ্টা করুন।");
+                alert("Admin hasn't submitted your score yet. Please check back later.");
             }
+        }
+
+        // Modal Close
+        function closeModal(){
+            document.getElementById('resultModal').classList.remove('show-modal');
         }
     </script>
 </body>
