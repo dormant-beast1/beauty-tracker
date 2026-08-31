@@ -214,33 +214,37 @@
             <button class="btn btn-purple" onclick="saveProfile()">Next →</button>
         </div>
 
-        <!-- PHOTO (3+ Photos) -->
-        <div id="step-photo" class="hidden">
-            <h3 style="text-align:center;">Give your best picture</h3>
-            <p style="text-align:center; color:#666;">(At least 3 - You can add more)</p>
-            
-            <div class="btn-group">
-                <button onclick="document.getElementById('galleryInput').click()" class="btn btn-gallery">📁 Gallery</button>
-                <button onclick="document.getElementById('cameraInput').click()" class="btn btn-camera">📷 Camera</button>
-            </div>
+        
+        <!-- PHOTO SECTION (3+ Photos) -->
+<div id="step-photo" class="hidden">
+    <h3 style="text-align:center;">Give your best picture</h3>
+    <p style="text-align:center; color:#666;">(At least 3 - You can add more)</p>
+    
+    <div class="btn-group">
+        <button onclick="document.getElementById('galleryInput').click()" class="btn btn-gallery">📁 Gallery</button>
+        <button onclick="document.getElementById('cameraInput').click()" class="btn btn-camera">📷 Camera</button>
+    </div>
 
-            <input type="file" id="galleryInput" accept="image/*" multiple class="hidden" onchange="handlePhotos(event)">
-            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotos(event)">
+    <input type="file" id="galleryInput" accept="image/*" multiple class="hidden" onchange="handlePhotos(event)">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotos(event)">
 
-            <div class="upload-box">
-                <p style="color:#5b3a8a;">Click here to select multiple photos</p>
-                <div id="photoGrid" class="photo-grid"></div>
-            </div>
+    <div class="upload-box">
+        <p style="color:#5b3a8a;">Click here to select multiple photos</p>
+        <div id="photoGrid" class="photo-grid"></div>
+    </div>
 
-            <div id="photoLoading" class="hidden" style="text-align:center; margin:15px; color:#5b3a8a; font-weight:bold;">🤖 AI is analyzing your beauty...</div>
-            
-            <div id="photoResult" class="hidden">
-                <div class="score-box">✨ Beauty Score: <span id="photoScore"></span>/100</div>
-                <button class="btn btn-purple" onclick="goVoice()">Next →</button>
-            </div>
-            
-            <div id="photoError" class="hidden" style="color:red; text-align:center; margin-top:10px;">Please select at least 3 photos!</div>
-        </div>
+    <!-- ✅ নতুন আপলোড বাটন -->
+    <button class="btn btn-purple" onclick="analyzePhotos()" id="uploadBtn" style="margin-top:20px;">📤 Upload & Analyze</button>
+
+    <div id="photoLoading" class="hidden" style="text-align:center; margin:15px; color:#5b3a8a; font-weight:bold;">🤖 AI is analyzing your beauty...</div>
+    
+    <div id="photoResult" class="hidden">
+        <div class="score-box">✨ Beauty Score: <span id="photoScore"></span>/100</div>
+        <button class="btn btn-purple" onclick="goVoice()">Next →</button>
+    </div>
+    
+    <div id="photoError" class="hidden" style="color:red; text-align:center; margin-top:10px;">Please select at least 3 photos!</div>
+</div>
 
         <!-- VOICE -->
         <div id="step-voice" class="hidden">
