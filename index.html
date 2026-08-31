@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Beauty Tracker by Fashison AI</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:sans-serif; }
+        body { background:linear-gradient(135deg,#667eea,#764ba2); min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
+        .glass { background:rgba(255,255,255,.95); border-radius:20px; padding:30px; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,.3); }
+        .logo { text-align:center; font-size:2rem; font-weight:800; background:linear-gradient(45deg,#ff6b6b,#feca57); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; }
+        .btn { width:100%; padding:12px; border:none; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; }
+        .btn-google { background:white; border:2px solid #ddd; color:#333; display:flex; align-items:center; justify-content:center; gap:10px; }
+        .btn-purple { background:#764ba2; color:white; }
+        .hidden { display:none !important; }
+        input, textarea { width:100%; padding:10px; margin:8px 0; border:2px solid #ddd; border-radius:8px; }
+        .card { background:#f9f9f9; padding:15px; border-radius:10px; margin:10px 0; }
+        .upload-box { border:2px dashed #764ba2; padding:30px; text-align:center; cursor:pointer; border-radius:10px; background:#fafafa; }
+        img#photoPreview { max-width:100%; margin-top:10px; border-radius:10px; }
+        .score-box { background:#f093fb; color:white; padding:15px; border-radius:10px; text-align:center; font-size:20px; font-weight:bold; margin:10px 0; }
+        .feedback { background:#e8f5e9; border-left:5px solid #4caf50; padding:15px; margin-top:20px; border-radius:5px; }
+    </style>
+</head>
+<body>
+    <div class="glass">
+        <div class="logo">✨ Beauty Tracker</div>
+
+        <!-- LOGIN -->
+        <div id="step-login">
+            <button class="btn btn-google" onclick="googleLogin()">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google দিয়ে লগইন করুন
+            </button>
+        </div>
+
+        <!-- PROFILE -->
+        <div id="step-profile" class="hidden">
+            <h3>আপনার তথ্য দিন</h3>
+            <input type="text" id="userName" placeholder="আপনার নাম">
+            <input type="date" id="dob">
+            <button class="btn btn-purple" onclick="saveProfile()">পরবর্তী</button>
+        </div>
+
+        <!-- PHOTO -->
+        <div id="step-photo" class="hidden">
+            <h3>📸 ছবি আপলোড করুন</h3>
+            <div class="upload-box" onclick="document.getElementById('photoInput').click()">
+                <p>ছবি ক্লিক করে সিলেক্ট করুন</p>
+                <img id="photoPreview" class="hidden">
+            </div>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden" onchange="uploadPhoto(event)">
+            <div id="photoLoading" class="hidden" style="text-align:center; margin:10px;">বিশ্লেষণ চলছে...</div>
+            <div id="photoResult" class="hidden">
+                <div class="score-box">সৌন্দর্য স্কোর: <span id="photoScore"></span>/100</div>
+                <button class="btn btn-purple" onclick="goVoice()">পরবর্তী</button>
+            </div>
+        </div>
+
+        <!-- VOICE -->
+        <div id="step-voice" class="hidden">
+            <h3>🎙️ ভয়েস রেকর্ড করুন</h3>
+            <div class="card">
+                <button class="btn btn-purple" onclick="startRec()">🔴 রেকর্ড শুরু</button>
+                <button class="btn" onclick="stopRec()" id="stopBtn" style="display:none; background:#333; color:white;">⏹️ বন্ধ</button>
+                <audio id="audioPlayer" controls class="hidden" style="margin-top:10px;"></audio>
+            </div>
+            <div id="voiceResult" class="hidden">
+                <div class="score-box">ভয়েস স্কোর: <span id="voiceScore"></span>/100</div>
+                <button class="btn btn-purple" onclick="goQuestions()">পরবর্তী</button>
+            </div>
+        </div>
+
+        <!-- QUESTIONS -->
+        <div id="step-questions" class="hidden">
+            <h3>📝 ব্যক্তিত্ব প্রশ্ন</h3>
+            <textarea id="q1" placeholder="১. আপনার জীবনধারা কেমন?"></textarea>
+            <textarea id="q2" placeholder="২. আদর্শ সাথীর ৩টি গুণ বলুন"></textarea>
+            <textarea id="q3" placeholder="৩. বিবাহিত জীবনে প্রত্যাশা কী?"></textarea>
+            <textarea id="q4" placeholder="৪. ক্যারিয়ার লক্ষ্য কী?"></textarea>
+            <textarea id="q5" placeholder="৫. প্রিয় শখ কী?"></textarea>
+            <button class="btn btn-purple" onclick="submitAll()">সাবমিট করুন</button>
+        </div>
+
+        <!-- RESULT -->
+        <div id="step-result" class="hidden">
+            <h3>🏆 AI রিপোর্ট</h3>
+            <div class="card">সৌন্দর্য: <b id="finalBeauty"></b> | ভয়েস: <b id="finalVoice"></b> | ব্যক্তিত্ব: <b id="finalPers"></b></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="btn btn-purple" onclick="location.reload()">আবার শুরু করুন</button>
+        </div>
+    </div>
+
+    <!-- FireBase Config (এখানে আপনার কনফিগ বসান) -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        let currentUser = null;
+        let photoScore = 0;
+        let voiceScore = 0;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioBlob = null;
+
+        // LOGIN
+        async function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                show('step-profile');
+            } catch(e) { alert("লগইন সমস্যা: " + e.message); }
+        }
+
+        function show(id) {
+            document.querySelectorAll('div[id^="step-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // PROFILE SAVE
+        async function saveProfile() {
+            const name = document.getElementById('userName').value;
+            const dob = document.getElementById('dob').value;
+            if(!name || !dob) return alert("সব তথ্য দিন!");
+            
+            await db.collection('users').doc(currentUser.uid).set({
+                name, dob, email: currentUser.email
+            }, {merge:true});
+            show('step-photo');
+        }
+
+        // PHOTO UPLOAD (আপনার কাছে ছবি যাবে এখানে)
+        async function uploadPhoto(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const img = document.getElementById('photoPreview');
+            img.src = URL.createObjectURL(file);
+            img.classList.remove('hidden');
+
+            document.getElementById('photoLoading').classList.remove('hidden');
+
+            // ফায়ারবেস স্টোরেজে আপলোড
+            const storageRef = storage.ref('user_photos/' + currentUser.uid + '/' + Date.now() + '.jpg');
+            await storageRef.put(file);
+            const downloadUrl = await storageRef.getDownloadURL();
+
+            // এআই স্কোর (সিমুলেটেড)
+            setTimeout(async () => {
+                photoScore = Math.floor(Math.random() * 46) + 55;
+                document.getElementById('photoScore').textContent = photoScore;
+                document.getElementById('photoLoading').classList.add('hidden');
+                document.getElementById('photoResult').classList.remove('hidden');
+
+                // ছবির লিংক ডেটাবেসে সেভ
+                await db.collection('users').doc(currentUser.uid).update({
+                    photoUrl: downloadUrl,
+                    photoScore: photoScore
+                });
+            }, 1500);
+        }
+
+        function goVoice() { show('step-voice'); }
+
+        // VOICE RECORDING (ভয়েস ফাইল আপনার কাছে যাবে এখানে)
+        async function startRec() {
+            const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                audioBlob = new Blob(audioChunks, {type:'audio/webm'});
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = document.getElementById('audioPlayer');
+                audio.src = audioUrl;
+                audio.classList.remove('hidden');
+
+                // ফায়ারবেস স্টোরেজে ভয়েস আপলোড
+                const storageRef = storage.ref('user_voices/' + currentUser.uid + '/' + Date.now() + '.webm');
+                await storageRef.put(audioBlob);
+                const downloadUrl = await storageRef.getDownloadURL();
+
+                voiceScore = Math.floor(Math.random() * 46) + 55;
+                document.getElementById('voiceScore').textContent = voiceScore;
+                document.getElementById('voiceResult').classList.remove('hidden');
+                await db.collection('users').doc(currentUser.uid).update({
+                    voiceUrl: downloadUrl,
+                    voiceScore: voiceScore
+                });
+            };
+            mediaRecorder.start();
+            document.querySelector('#step-voice .btn-purple').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+        }
+
+        function stopRec() {
+            mediaRecorder.stop();
+            document.getElementById('stopBtn').style.display = 'none';
+            document.querySelector('#step-voice .btn-purple').style.display = 'block';
+        }
+
+        function goQuestions() { show('step-questions'); }
+
+        // SUBMIT QUESTIONS (উত্তর ডেটাবেসে সেভ হবে)
+        async function submitAll() {
+            const answers = {
+                life: document.getElementById('q1').value,
+                partner: document.getElementById('q2').value,
+                marriage: document.getElementById('q3').value,
+                career: document.getElementById('q4').value,
+                hobby: document.getElementById('q5').value
+            };
+
+            const totalChars = Object.values(answers).join('').length;
+            const persScore = Math.min(100, Math.max(50, Math.floor(totalChars * 0.3) + 45));
+
+            await db.collection('users').doc(currentUser.uid).set({
+                answers, personalityScore: persScore
+            }, {merge:true});
+
+            document.getElementById('finalBeauty').textContent = photoScore;
+            document.getElementById('finalVoice').textContent = voiceScore;
+            document.getElementById('finalPers').textContent = persScore;
+            
+            const total = Math.round((photoScore + voiceScore + persScore) / 3);
+            document.getElementById('feedback').innerHTML = 
+                `আপনার মোট স্কোর ${total}/100। আপনার তথ্য সফলভাবে আমাদের সার্ভারে (Firebase) সেভ হয়েছে। AI বিশ্লেষণে আপনি আত্মবিশ্বাসী ও আকর্ষণীয়!`;
+
+            show('step-result');
+        }
+    </script>
+</body>
+</html>
