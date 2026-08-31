@@ -158,20 +158,32 @@
         </div>
 
         <!-- PHOTO -->
-        <div id="step-photo" class="hidden">
-            <h3>📸 ছবি আপলোড করুন</h3>
-            <div class="upload-box" onclick="document.getElementById('photoInput').click()">
-                <p>📁 গ্যালারি অথবা 📷 ক্যামেরা</p>
-                <p style="font-size:12px; color:#888;">(ছবি ক্লিক করে সিলেক্ট করুন)</p>
-                <img id="photoPreview" class="hidden">
-            </div>
-            <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden" onchange="uploadPhoto(event)">
-            <div id="photoLoading" class="hidden" style="text-align:center; margin:10px; color:#764ba2;">🤖 AI বিশ্লেষণ চলছে...</div>
-            <div id="photoResult" class="hidden">
-                <div class="score-box">✨ সৌন্দর্য স্কোর: <span id="photoScore"></span>/100</div>
-                <button class="btn btn-purple" onclick="goVoice()">পরবর্তী →</button>
-            </div>
-        </div>
+<div id="step-photo" class="hidden">
+    <h3>📸 ছবি আপলোড করুন</h3>
+    
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <button onclick="document.getElementById('galleryInput').click()" class="btn" style="background:#764ba2; color:white; flex:1;">
+            📁 গ্যালারি থেকে
+        </button>
+        <button onclick="document.getElementById('cameraInput').click()" class="btn" style="background:#d65a31; color:white; flex:1;">
+            📷 ক্যামেরা
+        </button>
+    </div>
+
+    <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="uploadPhoto(event)">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="uploadPhoto(event)">
+
+    <div class="upload-box" onclick="document.getElementById('galleryInput').click()">
+        <p>অথবা এখানে ক্লিক করে ছবি দিন</p>
+        <img id="photoPreview" class="hidden">
+    </div>
+
+    <div id="photoLoading" class="hidden" style="text-align:center; margin:10px; color:#764ba2;">🤖 AI বিশ্লেষণ চলছে...</div>
+    <div id="photoResult" class="hidden">
+        <div class="score-box">✨ সৌন্দর্য স্কোর: <span id="photoScore"></span>/100</div>
+        <button class="btn btn-purple" onclick="goVoice()">পরবর্তী →</button>
+    </div>
+</div>
 
         <!-- VOICE -->
         <div id="step-voice" class="hidden">
