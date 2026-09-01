@@ -17,7 +17,7 @@
         body {
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
-            background: #f4f6fb; /* হালকা নীল background */
+            background: #f4f6fb;
             background-image: radial-gradient(circle at 80% 20%, #ffe4e1 0%, #f4f6fb 40%);
             display: flex;
             justify-content: center;
@@ -25,14 +25,13 @@
             padding: 20px;
         }
 
-        /* মেইন হেডার লোগো */
         .header-logo {
             position: absolute;
             top: 20px;
             left: 30px;
             font-size: 1.5rem;
             font-weight: 700;
-            color: #e74c3c; /* লাল রঙ */
+            color: #e74c3c;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -126,7 +125,6 @@
 
         .hidden { display: none !important; }
 
-        /* ছবি প্রিভিউ ও প্রোগ্রেস বার */
         .photo-grid {
             display: flex;
             gap: 10px;
@@ -176,7 +174,7 @@
             font-weight: 700;
         }
 
-        /* মডাল (পপ-আপ) */
+        /* মডাল */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -205,30 +203,38 @@
         .modal-content h2 { color: #e74c3c; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
         .modal-content .score-display { font-size: 4rem; font-weight: 800; margin: 20px 0; color: #2d3436; }
         .modal-close { background: #e74c3c; color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: 600; }
+        
+        /* নতুন যোগ: অ্যাডমিনের মন্তব্য দেখানোর জন্য */
+        .comment-display { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #fff0f0; 
+            border-left: 4px solid #e74c3c; 
+            border-radius: 8px; 
+            text-align: left; 
+            color: #2d3436; 
+            line-height: 1.6; 
+        }
     </style>
 </head>
 <body>
 
-    <!-- এটাই আপনার ল্যান্ডিং পেইজের হেডার -->
     <div class="header-logo">✨ Beauty Tracker</div>
 
     <div class="main-card">
 
-        <!-- ১. Landing/Trust Page -->
         <div id="step-trust">
             <div class="big-heading">You are totally safe</div>
             <p class="description">Your photos, voice, and information are 100% secure. They are only visible to our admin. We never share your data with any third party.</p>
             <button class="btn btn-primary" onclick="startAssessment()">Get Started →</button>
         </div>
 
-        <!-- ২. Login -->
         <div id="step-login" class="hidden">
             <div class="big-heading">Welcome Back!</div>
             <p class="description">Login to continue your beauty assessment.</p>
             <button class="btn btn-primary" onclick="googleLogin()">Continue with Google</button>
         </div>
 
-        <!-- ৩. Profile -->
         <div id="step-profile" class="hidden">
             <div class="big-heading">Your Information</div>
             <div class="input-group">
@@ -243,7 +249,6 @@
             <button class="btn btn-secondary" onclick="goBack()">← Back</button>
         </div>
 
-        <!-- ৪. Photo Upload -->
         <div id="step-photo" class="hidden">
             <div class="big-heading" style="font-size: 2rem;">Upload Your Photos</div>
             <p class="description">Upload at least 3 photos to get the best results.</p>
@@ -254,7 +259,6 @@
             <input type="file" id="photoInput" accept="image/*" multiple class="hidden" onchange="handlePhoto(event)">
             <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event)">
 
-            <!-- প্রোগ্রেস বার (যোগ করা হয়েছে) -->
             <div id="photoProgressContainer" class="hidden" style="margin-top: 20px;">
                 <div class="progress-container">
                     <div id="photoProgressFill" class="progress-fill"></div>
@@ -268,7 +272,6 @@
             <button class="btn btn-primary" onclick="goVoice()">Next →</button>
         </div>
 
-        <!-- ৫. Voice Recording -->
         <div id="step-voice" class="hidden">
             <div class="big-heading" style="font-size: 2rem;">Voice Recording</div>
             <p class="description">Speak about yourself or sing a line. Max 2 minutes.</p>
@@ -281,7 +284,6 @@
             <button class="btn btn-primary" onclick="goQuestions()">Next →</button>
         </div>
 
-        <!-- ৬. Personality Questions -->
         <div id="step-questions" class="hidden">
             <div class="big-heading" style="font-size: 2rem;">Personality Questions</div>
             <div class="input-group">
@@ -296,7 +298,6 @@
             <button class="btn btn-primary" onclick="submitAll()">📤 Submit Data</button>
         </div>
 
-        <!-- ৭. Submitted Message -->
         <div id="step-submitted" class="hidden">
             <div class="big-heading" style="font-size: 2rem;">✅ Data Submitted!</div>
             <p class="description">Your info has been sent to the admin. Please check back later.</p>
@@ -305,12 +306,15 @@
 
     </div>
 
-    <!-- ৮. Result Modal -->
     <div id="resultModal" class="modal-overlay">
         <div class="modal-content">
             <h2>Your AI Score</h2>
             <div class="score-display" id="modalScore">--</div>
-            <p style="color:#666; margin-bottom:20px;">Thank you for trusting us!</p>
+            <p style="color:#666; margin-bottom:10px;">Thank you for trusting us!</p>
+            
+            <!-- নতুন যোগ: এখানে অ্যাডমিনের মন্তব্য দেখাবে -->
+            <div id="adminComment" class="comment-display" style="display: none;"></div>
+            
             <button class="modal-close" onclick="closeModal()">Close</button>
         </div>
     </div>
@@ -321,7 +325,6 @@
         const auth = firebase.auth(); const db = firebase.firestore();
         const CLOUD_NAME = "hbgz4asd"; const UPLOAD_PRESET = "beauty_tracker";
         
-        // Session State
         let currentUser = null; 
         let mediaRecorder = null; 
         let audioChunks = []; 
@@ -498,11 +501,23 @@
             show('step-submitted');
         }
 
+        // আপডেটেড: স্কোরের সাথে মন্তব্যও দেখাবে
         async function checkResult(){
             const doc = await db.collection('users').doc(currentUser.uid).get();
             if(doc.exists && doc.data().score !== null && doc.data().score !== undefined){
                 const score = doc.data().score;
+                const comment = doc.data().comment || ""; // মন্তব্য লোড করা
+                
                 document.getElementById('modalScore').textContent = score + "/100";
+                
+                const commentDiv = document.getElementById('adminComment');
+                if(comment) {
+                    commentDiv.textContent = comment;
+                    commentDiv.style.display = 'block';
+                } else {
+                    commentDiv.style.display = 'none';
+                }
+                
                 document.getElementById('resultModal').classList.add('show-modal');
             } else {
                 alert("Admin hasn't submitted your score yet. Please check back later.");
